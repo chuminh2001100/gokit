@@ -12,6 +12,13 @@ import (
 	"google.golang.org/grpc"
 )
 
+type Meeting interface {
+	SayHello123(ctx context.Context, req *pb.HelloRequest, abc string) (*pb.HelloResponse, error)
+}
+
+type meeting123 struct {
+}
+
 type greeterService struct {
 }
 
@@ -20,20 +27,25 @@ func (s *greeterService) SayHello(ctx context.Context, req *pb.HelloRequest) (*p
 	return &pb.HelloResponse{Message: "Hello, MINHCV5666222 " + req.Name + "!"}, nil
 }
 
+func (s *meeting123) SayHello123(ctx context.Context, req *pb.HelloRequest, abc string) (*pb.HelloResponse, error) {
+	fmt.Println("Fourth Here")
+	return &pb.HelloResponse{Message: "Hello, MINHCV5666222 " + req.Name + abc + "!"}, nil
+}
+
 func (s *greeterService) SayGoodbye(ctx context.Context, req *pb.GoodbyeRequest) (*pb.GoodbyeResponse, error) {
 	return &pb.GoodbyeResponse{Message: "Goodbye, MINHCV5 " + req.Name + "!"}, nil
 }
 
-func makeSayHelloEndpoint(svc pb.HelloServiceServer) endpoint.Endpoint {
+func makeSayHelloEndpoint(svc Meeting) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		fmt.Println("There Here")
 		req := request.(*pb.HelloRequest)
-		return svc.SayHello(ctx, req)
+		return svc.SayHello123(ctx, req, "WINDOW, MAT QUA")
 	}
 }
 
 func makeSayGoodbyeEndpoint(svc pb.HelloServiceServer) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		fmt.Println("There Here")
 		req := request.(*pb.GoodbyeRequest)
 		return svc.SayGoodbye(ctx, req)
 	}
@@ -46,7 +58,7 @@ func decodeSayHelloRequest(_ context.Context, grpcReq interface{}) (interface{},
 }
 
 func encodeSayHelloResponse(_ context.Context, response interface{}) (interface{}, error) {
-	fmt.Println("Fifth Here")
+	fmt.Println("sixth Here")
 	resp := response.(*pb.HelloResponse)
 	return resp, nil
 }
@@ -85,9 +97,9 @@ func (s *greeterServiceServer) SayGoodbye(ctx context.Context, req *pb.GoodbyeRe
 }
 func main() {
 	svc := &greeterService{}
-
+	svc2 := &meeting123{}
 	sayHelloHandler := kitgrpc.NewServer(
-		makeSayHelloEndpoint(svc),
+		makeSayHelloEndpoint(svc2),
 		decodeSayHelloRequest,
 		encodeSayHelloResponse,
 	)
